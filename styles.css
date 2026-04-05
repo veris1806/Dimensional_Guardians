@@ -1,192 +1,146 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: Arial, sans-serif;
-  background-color: #1e272e;
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #1a1a2e;
   color: white;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  overflow: hidden;
 }
 
 #game-container {
   width: 800px;
   height: 600px;
-  background-color: #4cd137;
-  border: 6px solid #4a2311;
-  border-radius: 10px;
+  /* CARGAMOS TU IMAGEN DE BOSQUE */
+  background-image: url('bosque.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  border: 6px solid #3e2723;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
 }
 
 #hud {
   display: flex;
-  justify-content: space-between;
-  padding: 10px 25px;
-  background-color: #4a2311;
+  justify-content: space-around;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.6);
   color: #f1c40f;
   font-weight: bold;
-  font-size: 1.2rem;
-  border-bottom: 4px solid #2d1309;
+  z-index: 100;
 }
 
 #lanes-container {
   flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  position: relative; 
+  position: relative;
+  /* Dejamos el espacio de arriba para la batalla */
+  height: 450px; 
 }
 
-/* --- ZONA DE LA CASA --- */
+/* Hacemos la zona de la casa invisible para que no tape el dibujo */
 #home-zone {
   position: absolute;
   left: 0;
-  top: 0;
-  bottom: 0;
-  width: 90px;
-  background-color: #f39c12;
-  border-right: 4px solid #d35400;
-  z-index: 5;
-  box-shadow: 6px 0 15px rgba(0,0,0,0.6);
-  overflow: hidden;
-  transition: filter 0.1s;
-}
-
-.roof {
-  position: absolute;
-  top: 0;
-  left: -10px;
-  width: 40px;
+  width: 80px;
   height: 100%;
-  background-color: #c0392b;
-  border-right: 6px solid #922b21;
-  box-shadow: 4px 0 10px rgba(0,0,0,0.5);
-  z-index: 2;
+  z-index: 5;
 }
 
-.door {
-  position: absolute;
-  top: 50%;
-  right: 8px;
-  transform: translateY(-50%);
-  width: 35px;
-  height: 65px;
-  background-color: #5d4037;
-  border: 3px solid #3e2723;
-  border-radius: 4px 4px 0 0;
-  z-index: 1;
-  box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5);
-}
-
-.window {
-  position: absolute;
-  right: 12px;
-  width: 25px;
-  height: 35px;
-  background-color: #85c1e9;
-  border: 3px solid #ecf0f1;
-  border-radius: 3px;
-  z-index: 1;
-  background-image: 
-    linear-gradient(transparent 45%, #ecf0f1 45%, #ecf0f1 55%, transparent 55%),
-    linear-gradient(90deg, transparent 45%, #ecf0f1 45%, #ecf0f1 55%, transparent 55%);
-}
-
-.window-top { top: 12%; }
-.window-bottom { bottom: 12%; }
-
-/* --- CARRILES --- */
 .lane {
-  flex: 1;
+  height: 33.33%;
+  width: 100%;
   position: relative;
-  background: repeating-linear-gradient(to right, #4cd137, #4cd137 60px, #44bd32 60px, #44bd32 120px);
-  border-bottom: 1px solid rgba(0,0,0,0.1);
+  background: transparent; /* Transparente para ver el bosque */
 }
 
-.lane.selectable { cursor: crosshair; }
-.lane.selectable:hover { filter: brightness(1.15); }
+/* Efecto visual cuando puedes poner un personaje */
+.lane.selectable:hover {
+  background: rgba(255, 255, 255, 0.1);
+  cursor: crosshair;
+}
 
-/* --- BARRA DE SELECCIÓN --- */
+/* BARRA EN LA ZONA AZUL */
 #selection-bar {
+  position: absolute;
+  bottom: 20px; /* Ajustado para que caiga en el cuadro azul */
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: space-around;
+  gap: 20px;
   padding: 10px;
-  background-color: #4a2311;
-  border-top: 4px solid #2d1309;
+  background: transparent;
+  z-index: 110;
 }
 
 .guardian-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  width: 90px;
+  height: 90px;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px 15px;
-  cursor: pointer;
-  border: 3px solid #2d1309;
-  border-radius: 6px;
-  color: white;
-  transition: transform 0.1s;
-  background-color: #27ae60;
-  min-width: 80px;
+  justify-content: center;
+  transition: transform 0.2s;
 }
 
-.guardian-btn[data-type="tanque"] { background-color: #e1b12c; }
-.guardian-btn[data-type="arquero"] { background-color: #2ecc71; }
-.guardian-btn[data-type="mago"] { background-color: #9b59b6; }
-.guardian-btn[data-type="ninja"] { background-color: #e74c3c; }
-
-.guardian-btn.disabled {
-  filter: grayscale(100%) brightness(0.4);
-  cursor: not-allowed;
+.guardian-btn img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
 }
 
 .guardian-btn.selected {
   border-color: #f1c40f;
+  background: rgba(241, 196, 15, 0.2);
   transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(241, 196, 15, 0.8);
 }
 
-/* Imagen dentro de los botones */
-.guardian-btn img {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-  margin-bottom: 5px;
-  filter: drop-shadow(2px 2px 2px black);
+.guardian-btn.disabled {
+  filter: grayscale(1) brightness(0.5);
+  cursor: not-allowed;
 }
 
-/* --- ENTIDADES (PERSONAJES EN EL JUEGO) --- */
+.cost {
+  font-size: 0.8rem;
+  color: #f1c40f;
+  margin-top: 2px;
+}
+
+/* PERSONAJES EN EL CAMPO */
 .entidad {
   position: absolute;
   top: 50%;
   transform: translateY(-50%) translateX(-50%);
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  z-index: 50;
 }
 
-/* ESTA ES LA PARTE IMPORTANTE PARA TUS .WEBP */
 .imagen-personaje {
-  width: 65px; 
-  height: 65px;
+  width: 70px;
+  height: 70px;
   object-fit: contain;
+  /* Sombra para que resalten sobre el verde */
   filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.5));
-  display: block;
 }
 
 .health-bar-container {
   width: 40px;
   height: 6px;
-  background-color: #c0392b;
-  border: 1px solid black;
+  background: #c0392b;
+  border: 1px solid #000;
   margin-bottom: 4px;
 }
 
-.health-bar-fill { height: 100%; background-color: #2ecc71; width: 100%; }
-.recibiendo-dano { filter: brightness(1.5) drop-shadow(0 0 10px red); }
-
-/* Ocultamos el emoji por si quedó algún rastro */
-.emoji-personaje { display: none; }
+.health-bar-fill {
+  height: 100%;
+  background: #2ecc71;
+  width: 100%;
+}
