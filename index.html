@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dimensional Guardians</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="game-container">
+    <header id="hud">
+      <div class="stat">Base: <span id="base-health">100</span> ❤️</div>
+      <div class="stat">Oleada: <span id="wave-number">1</span> 💀</div>
+      <div class="stat">Energía: <span id="magic-energy">0</span>/10 ☀️</div>
+    </header>
+
+    <main id="lanes-container">
+      
+      <div id="home-zone">
+        <div class="roof"></div>
+        <div class="window window-top"></div>
+        <div class="door"></div>
+        <div class="window window-bottom"></div>
+      </div>
+      
+      <div class="lane" id="lane-1"></div>
+      <div class="lane" id="lane-2"></div>
+      <div class="lane" id="lane-3"></div>
+    </main>
+
+    <footer id="selection-bar">
+      <button class="guardian-btn disabled" data-type="tanque">
+        <span class="icon">🛡️</span>
+        <span class="name">Tanque</span>
+        <span class="cost">3 ☀️</span>
+      </button>
+      <button class="guardian-btn disabled" data-type="arquero">
+        <span class="icon">🏹</span>
+        <span class="name">Arquero</span>
+        <span class="cost">2 ☀️</span>
+      </button>
+      <button class="guardian-btn disabled" data-type="mago">
+        <span class="icon">🧙</span>
+        <span class="name">Mago</span>
+        <span class="cost">4 ☀️</span>
+      </button>
+      <button class="guardian-btn disabled" data-type="ninja">
+        <span class="icon">🥷</span>
+        <span class="name">Ninja</span>
+        <span class="cost">2 ☀️</span>
+      </button>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
