@@ -81,17 +81,6 @@ body {
   box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5);
 }
 
-.door::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 4px;
-  width: 6px;
-  height: 6px;
-  background-color: #f1c40f;
-  border-radius: 50%;
-}
-
 .window {
   position: absolute;
   right: 12px;
@@ -104,7 +93,6 @@ body {
   background-image: 
     linear-gradient(transparent 45%, #ecf0f1 45%, #ecf0f1 55%, transparent 55%),
     linear-gradient(90deg, transparent 45%, #ecf0f1 45%, #ecf0f1 55%, transparent 55%);
-  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
 }
 
 .window-top { top: 12%; }
@@ -118,13 +106,8 @@ body {
   border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
-/* Efectos al seleccionar personaje */
-.lane.selectable {
-  cursor: crosshair;
-}
-.lane.selectable:hover {
-  filter: brightness(1.15);
-}
+.lane.selectable { cursor: crosshair; }
+.lane.selectable:hover { filter: brightness(1.15); }
 
 /* --- BARRA DE SELECCIÓN --- */
 #selection-bar {
@@ -144,61 +127,66 @@ body {
   border: 3px solid #2d1309;
   border-radius: 6px;
   color: white;
-  transition: transform 0.1s, filter 0.3s, box-shadow 0.2s;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 4px 0 #2d1309; 
-  background-color: #27ae60; /* Color base */
+  transition: transform 0.1s;
+  background-color: #27ae60;
+  min-width: 80px;
 }
 
-/* Colores específicos de cada botón */
 .guardian-btn[data-type="tanque"] { background-color: #e1b12c; }
 .guardian-btn[data-type="arquero"] { background-color: #2ecc71; }
 .guardian-btn[data-type="mago"] { background-color: #9b59b6; }
 .guardian-btn[data-type="ninja"] { background-color: #e74c3c; }
 
-.guardian-btn:active:not(.disabled) {
-  transform: translateY(4px);
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 0 #2d1309;
-}
-
 .guardian-btn.disabled {
   filter: grayscale(100%) brightness(0.4);
   cursor: not-allowed;
-  transform: translateY(2px);
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 2px 0 #2d1309;
 }
 
-/* Efecto visual al tener un botón seleccionado */
 .guardian-btn.selected {
   border-color: #f1c40f;
-  transform: scale(1.1) translateY(-5px);
-  box-shadow: 0 0 15px rgba(241, 196, 15, 0.8), inset 0 0 10px rgba(0,0,0,0.2);
-  z-index: 10;
-  filter: brightness(1.2);
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(241, 196, 15, 0.8);
 }
 
-.guardian-btn .icon { font-size: 2.2rem; filter: drop-shadow(1px 1px 2px black); }
-.guardian-btn .name { font-size: 0.85rem; font-weight: bold; margin-top: 3px; text-shadow: 1px 1px 1px black;}
-.guardian-btn .cost { background-color: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 10px; margin-top: 4px; font-size: 0.8rem; font-weight: bold; color: #f1c40f; }
+/* Imagen dentro de los botones */
+.guardian-btn img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  margin-bottom: 5px;
+  filter: drop-shadow(2px 2px 2px black);
+}
 
-/* --- ENTIDADES Y BARRAS DE VIDA --- */
+/* --- ENTIDADES (PERSONAJES EN EL JUEGO) --- */
 .entidad {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%) translateX(-50%); /* Centrado exacto en el clic */
-  user-select: none;
+  transform: translateY(-50%) translateX(-50%);
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.emoji-personaje { font-size: 2.8rem; filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.5)); }
+
+/* ESTA ES LA PARTE IMPORTANTE PARA TUS .WEBP */
+.imagen-personaje {
+  width: 65px; 
+  height: 65px;
+  object-fit: contain;
+  filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.5));
+  display: block;
+}
+
 .health-bar-container {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 36px;
+  width: 40px;
   height: 6px;
   background-color: #c0392b;
   border: 1px solid black;
-  border-radius: 3px;
+  margin-bottom: 4px;
 }
+
 .health-bar-fill { height: 100%; background-color: #2ecc71; width: 100%; }
 .recibiendo-dano { filter: brightness(1.5) drop-shadow(0 0 10px red); }
+
+/* Ocultamos el emoji por si quedó algún rastro */
+.emoji-personaje { display: none; }
