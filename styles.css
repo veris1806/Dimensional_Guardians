@@ -1,0 +1,204 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #1e272e;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#game-container {
+  width: 800px;
+  height: 600px;
+  background-color: #4cd137;
+  border: 6px solid #4a2311;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+}
+
+#hud {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 25px;
+  background-color: #4a2311;
+  color: #f1c40f;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-bottom: 4px solid #2d1309;
+}
+
+#lanes-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative; 
+}
+
+/* --- ZONA DE LA CASA --- */
+#home-zone {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 90px;
+  background-color: #f39c12;
+  border-right: 4px solid #d35400;
+  z-index: 5;
+  box-shadow: 6px 0 15px rgba(0,0,0,0.6);
+  overflow: hidden;
+  transition: filter 0.1s;
+}
+
+.roof {
+  position: absolute;
+  top: 0;
+  left: -10px;
+  width: 40px;
+  height: 100%;
+  background-color: #c0392b;
+  border-right: 6px solid #922b21;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.5);
+  z-index: 2;
+}
+
+.door {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 35px;
+  height: 65px;
+  background-color: #5d4037;
+  border: 3px solid #3e2723;
+  border-radius: 4px 4px 0 0;
+  z-index: 1;
+  box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5);
+}
+
+.door::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  background-color: #f1c40f;
+  border-radius: 50%;
+}
+
+.window {
+  position: absolute;
+  right: 12px;
+  width: 25px;
+  height: 35px;
+  background-color: #85c1e9;
+  border: 3px solid #ecf0f1;
+  border-radius: 3px;
+  z-index: 1;
+  background-image: 
+    linear-gradient(transparent 45%, #ecf0f1 45%, #ecf0f1 55%, transparent 55%),
+    linear-gradient(90deg, transparent 45%, #ecf0f1 45%, #ecf0f1 55%, transparent 55%);
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
+}
+
+.window-top { top: 12%; }
+.window-bottom { bottom: 12%; }
+
+/* --- CARRILES --- */
+.lane {
+  flex: 1;
+  position: relative;
+  background: repeating-linear-gradient(to right, #4cd137, #4cd137 60px, #44bd32 60px, #44bd32 120px);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Efectos al seleccionar personaje */
+.lane.selectable {
+  cursor: crosshair;
+}
+.lane.selectable:hover {
+  filter: brightness(1.15);
+}
+
+/* --- BARRA DE SELECCIÓN --- */
+#selection-bar {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  background-color: #4a2311;
+  border-top: 4px solid #2d1309;
+}
+
+.guardian-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 15px;
+  cursor: pointer;
+  border: 3px solid #2d1309;
+  border-radius: 6px;
+  color: white;
+  transition: transform 0.1s, filter 0.3s, box-shadow 0.2s;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 4px 0 #2d1309; 
+  background-color: #27ae60; /* Color base */
+}
+
+/* Colores específicos de cada botón */
+.guardian-btn[data-type="tanque"] { background-color: #e1b12c; }
+.guardian-btn[data-type="arquero"] { background-color: #2ecc71; }
+.guardian-btn[data-type="mago"] { background-color: #9b59b6; }
+.guardian-btn[data-type="ninja"] { background-color: #e74c3c; }
+
+.guardian-btn:active:not(.disabled) {
+  transform: translateY(4px);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 0 #2d1309;
+}
+
+.guardian-btn.disabled {
+  filter: grayscale(100%) brightness(0.4);
+  cursor: not-allowed;
+  transform: translateY(2px);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 2px 0 #2d1309;
+}
+
+/* Efecto visual al tener un botón seleccionado */
+.guardian-btn.selected {
+  border-color: #f1c40f;
+  transform: scale(1.1) translateY(-5px);
+  box-shadow: 0 0 15px rgba(241, 196, 15, 0.8), inset 0 0 10px rgba(0,0,0,0.2);
+  z-index: 10;
+  filter: brightness(1.2);
+}
+
+.guardian-btn .icon { font-size: 2.2rem; filter: drop-shadow(1px 1px 2px black); }
+.guardian-btn .name { font-size: 0.85rem; font-weight: bold; margin-top: 3px; text-shadow: 1px 1px 1px black;}
+.guardian-btn .cost { background-color: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 10px; margin-top: 4px; font-size: 0.8rem; font-weight: bold; color: #f1c40f; }
+
+/* --- ENTIDADES Y BARRAS DE VIDA --- */
+.entidad {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) translateX(-50%); /* Centrado exacto en el clic */
+  user-select: none;
+  z-index: 10;
+}
+.emoji-personaje { font-size: 2.8rem; filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.5)); }
+.health-bar-container {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 6px;
+  background-color: #c0392b;
+  border: 1px solid black;
+  border-radius: 3px;
+}
+.health-bar-fill { height: 100%; background-color: #2ecc71; width: 100%; }
+.recibiendo-dano { filter: brightness(1.5) drop-shadow(0 0 10px red); }
