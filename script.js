@@ -1,151 +1,192 @@
-// --- VARIABLES DE ESTADO ---
-let baseHealth = 100;
-let magicEnergy = 0;
-const maxMagicEnergy = 10;
-let oleadaActual = 1;
-let enemigosPorGenerar = 5;
-let framesDesdeUltimoEnemigo = 0;
-let framesParaSiguienteEnemigo = 180;
-let framesEnergia = 0;
-let personajeSeleccionado = null;
-
-const guardianesActivos = [];
-const enemigosActivos = [];
-
-const uiBaseHealth = document.getElementById('base-health');
-const uiMagicEnergy = document.getElementById('magic-energy');
-const uiWaveNumber = document.getElementById('wave-number');
-const botonesGuardianes = document.querySelectorAll('.guardian-btn');
-const lanesDivs = document.querySelectorAll('.lane');
-
-// --- CLASE BASE DE PERSONAJES ---
-class Personaje {
-  constructor(vida, dano, velocidad, archivoImagen) {
-    this.vidaMaxima = vida;
-    this.vidaActual = vida;
-    this.dano = dano;
-    this.velocidad = velocidad;
-    this.icono = archivoImagen; // Aquí guardamos el nombre del .webp
-  }
-}
-
-// --- TUS PERSONAJES (NOMBRES SEGÚN TU FOTO) ---
-class G_Caballero extends Personaje { constructor() { super(300, 10, 0.4, 'guardiancaballero.webp'); } }
-class G_Arquero extends Personaje { constructor() { super(80, 25, 1.2, 'guardianarquero.webp'); } }
-class G_Mago extends Personaje { constructor() { super(100, 40, 0.8, 'magoguardian.webp'); } }
-class G_Peca extends Personaje { constructor() { super(250, 60, 0.5, 'peca.webp'); } }
-
-// Tu enemigo según la lista
-class Enemigo_1 extends Personaje { constructor() { super(70, 15, 0.5, 'enemigo1.webp'); } }
-
+// --- CONFIGURACIÓN DE PERSONAJES (Tus archivos exactos) ---
 const dicG = {
-  tanque: { c: G_Caballero, costo: 3 },
-  arquero: { c: G_Arquero, costo: 2 },
-  mago: { c: G_Mago, costo: 4 },
-  ninja: { c: G_Peca, costo: 5 }
+    tanque:  { icono: 'tanquee.png', costo: 3, vida: 300, dano: 10, vel: 0.4 },
+    arquero: { icono: 'arqueroo.png', costo: 2, vida: 80, dano: 25, vel: 1.2 },
+    mago:    { icono: 'magoo.png', costo: 4, vida: 100, dano: 40, vel: 0.8 },
+    ninja:   { icono: 'ninjaa.png', costo: 5, vida: 150, dano: 60, vel: 0.6 }
 };
 
-// --- FUNCIONES LÓGICAS ---
-function updateHUD() {
-  uiBaseHealth.textContent = Math.floor(baseHealth);
-  uiMagicEnergy.textContent = magicEnergy;
-  uiWaveNumber.textContent = oleadaActual;
-  botonesGuardianes.forEach(b => {
-    const t = b.getAttribute('data-type');
-    if (magicEnergy >= dicG[t].costo) b.classList.remove('disabled');
-    else b.classList.add('disabled');
-  });
-}
+// --- VARIABLES DE ESTADO ---
+let baseHealth = 100;
+let magicEnergy = 5;
+let oleada = 1;
+let seleccionado = null;
+let guardianesActivos = [];
+let enemigosActivos = [];
+let frames = 0;
 
-function crearVisual(archivo, x, parent) {
-  const el = document.createElement('div');
-  el.classList.add('entidad');
-  el.style.left = x + 'px';
-  // IMPORTANTE: Aquí creamos la etiqueta <img> para que se vea tu .webp
-  el.innerHTML = `
-    <div class="health-bar-container"><div class="health-bar-fill"></div></div>
-    <img src="${archivo}" class="imagen-personaje">
-  `;
-  parent.appendChild(el);
-  return { el: el, bar: el.querySelector('.health-bar-fill') };
-}
+// --- ELEMENTOS DE LA INTERFAZ ---
+const uiVida = document.getElementById('base-health');
+const uiEnergia = document.getElementById('magic-energy');
+const uiOleada = document.getElementById('wave-number');
+const botones = document.querySelectorAll('.guardian-btn');
+const carriles = document.querySelectorAll('.lane');
 
-botonesGuardianes.forEach(b => {
-  b.addEventListener('click', () => {
-    if (b.classList.contains('disabled')) return;
-    botonesGuardianes.forEach(btn => btn.classList.remove('selected'));
-    personajeSeleccionado = b.getAttribute('data-type');
-    b.classList.add('selected');
-  });
-});
+function actualizarInterfaz() {
+    uiVida.textContent = Math.floor(baseHealth);
+    uiEnergia.textContent = magicEnergy;
+    uiOleada.textContent = oleada;
 
-lanesDivs.forEach((lane, i) => {
-  lane.addEventListener('click', (e) => {
-    if (!personajeSeleccionado) return;
-    const d = dicG[personajeSeleccionado];
-    magicEnergy -= d.costo;
-    const rect = lane.getBoundingClientRect();
-    let posX = Math.max(110, e.clientX - rect.left);
-    const nG = new d.c();
-    const vis = crearVisual(nG.icono, posX, lane);
-    guardianesActivos.push({ logica: nG, visual: vis.el, barra: vis.bar, posX: posX, carril: i + 1, peleando: false });
-    personajeSeleccionado = null;
-    botonesGuardianes.forEach(btn => btn.classList.remove('selected'));
-    updateHUD();
-  });
-});
-
-function generarEnemigo() {
-  const nE = new Enemigo_1();
-  const c = Math.floor(Math.random() * 3) + 1;
-  const vis = crearVisual(nE.icono, 780, document.getElementById(`lane-${c}`));
-  enemigosActivos.push({ logica: nE, visual: vis.el, barra: vis.bar, posX: 780, carril: c, peleando: false });
-}
-
-function gameLoop() {
-  framesEnergia++;
-  if (framesEnergia >= 120 && magicEnergy < maxMagicEnergy) { magicEnergy++; updateHUD(); framesEnergia = 0; }
-  
-  if (enemigosPorGenerar > 0) {
-    framesDesdeUltimoEnemigo++;
-    if (framesDesdeUltimoEnemigo >= framesParaSiguienteEnemigo) { generarEnemigo(); enemigosPorGenerar--; framesDesdeUltimoEnemigo = 0; }
-  } else if (enemigosActivos.length === 0) {
-    oleadaActual++; 
-    enemigosPorGenerar = 5 + oleadaActual;
-    updateHUD();
-  }
-  
-  guardianesActivos.forEach(g => g.peleando = false);
-  enemigosActivos.forEach(e => e.peleando = false);
-
-  guardianesActivos.forEach(g => {
-    enemigosActivos.forEach(e => {
-      if (g.carril === e.carril && Math.abs(e.posX - g.posX) < 50) {
-        g.peleando = true; e.peleando = true;
-        e.logica.vidaActual -= g.logica.dano/60; g.logica.vidaActual -= e.logica.dano/60;
-        e.barra.style.width = (e.logica.vidaActual/e.logica.vidaMaxima)*100 + "%";
-        g.barra.style.width = (g.logica.vidaActual/g.logica.vidaMaxima)*100 + "%";
-      }
+    botones.forEach(btn => {
+        const tipo = btn.getAttribute('data-type');
+        if (magicEnergy >= dicG[tipo].costo) {
+            btn.classList.remove('disabled');
+        } else {
+            btn.classList.add('disabled');
+        }
     });
-  });
-
-  for (let i = 0; i < guardianesActivos.length; i++) {
-    let g = guardianesActivos[i];
-    if (!g.peleando) { g.posX += g.logica.velocidad; g.visual.style.left = g.posX + 'px'; }
-    if (g.logica.vidaActual <= 0 || g.posX > 850) { g.visual.remove(); guardianesActivos.splice(i, 1); i--; }
-  }
-
-  for (let j = 0; j < enemigosActivos.length; j++) {
-    let e = enemigosActivos[j];
-    if (!e.peleando) { e.posX -= e.logica.velocidad; e.visual.style.left = e.posX + 'px'; }
-    if (e.posX <= 90) { baseHealth -= 0.5; updateHUD(); }
-    if (e.logica.vidaActual <= 0) { e.visual.remove(); enemigosActivos.splice(j, 1); j--; }
-  }
-
-  if (baseHealth <= 0) { alert("¡Derrota! Tu casa ha sido destruida."); location.reload(); return; }
-  requestAnimationFrame(gameLoop);
 }
 
-// INICIO
-updateHUD();
+// --- LÓGICA DE SELECCIÓN ---
+botones.forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (btn.classList.contains('disabled')) return;
+        
+        botones.forEach(b => b.classList.remove('selected'));
+        seleccionado = btn.getAttribute('data-type');
+        btn.classList.add('selected');
+        
+        carriles.forEach(l => l.classList.add('selectable'));
+    });
+});
+
+// --- INVOCACIÓN EN CARRILES ---
+carriles.forEach((lane, index) => {
+    lane.addEventListener('click', (e) => {
+        if (!seleccionado) return;
+        const datos = dicG[seleccionado];
+        
+        if (magicEnergy >= datos.costo) {
+            magicEnergy -= datos.costo;
+            
+            const rect = lane.getBoundingClientRect();
+            const xInicial = e.clientX - rect.left;
+
+            const personajeObj = {
+                visual: crearVisual(datos.icono, xInicial, lane, true),
+                vida: datos.vida,
+                vidaMax: datos.vida,
+                dano: datos.dano,
+                vel: datos.vel,
+                x: xInicial,
+                lane: index + 1
+            };
+
+            guardianesActivos.push(personajeObj);
+            
+            // Limpiar selección
+            seleccionado = null;
+            botones.forEach(b => b.classList.remove('selected'));
+            carriles.forEach(l => l.classList.remove('selectable'));
+            actualizarInterfaz();
+        }
+    });
+});
+
+function crearVisual(imgSrc, x, padre, esGuardian) {
+    const div = document.createElement('div');
+    div.classList.add('entidad');
+    div.style.left = x + 'px';
+    
+    div.innerHTML = `
+        <div class="health-bar-container"><div class="health-bar-fill"></div></div>
+        <img src="${imgSrc}" class="imagen-personaje" style="${esGuardian ? '' : 'transform: scaleX(-1)'}">
+    `;
+    padre.appendChild(div);
+    return div;
+}
+
+// --- ENEMIGOS ---
+function spawnEnemigo() {
+    const carrilRandom = Math.floor(Math.random() * 3);
+    const padre = carriles[carrilRandom];
+    
+    // Usamos enemigo1.png o enemigo2.png al azar
+    const imgEnemigo = Math.random() > 0.5 ? 'enemigo1.png' : 'enemigo2.png';
+
+    const enemigoObj = {
+        visual: crearVisual(imgEnemigo, 780, padre, false),
+        vida: 80,
+        vidaMax: 80,
+        dano: 20,
+        vel: 0.7,
+        x: 780,
+        lane: carrilRandom + 1
+    };
+    enemigosActivos.push(enemigoObj);
+}
+
+// --- LOOP DEL JUEGO (60 veces por segundo) ---
+function gameLoop() {
+    frames++;
+    
+    // Recuperar energía cada 2 segundos
+    if (frames % 120 === 0 && magicEnergy < 10) {
+        magicEnergy++;
+        actualizarInterfaz();
+    }
+
+    // Aparecer enemigo cada 3 segundos
+    if (frames % 180 === 0) spawnEnemigo();
+
+    // Mover Guardianes y detectar combate
+    guardianesActivos.forEach((g, i) => {
+        let enCombate = false;
+        
+        enemigosActivos.forEach(e => {
+            if (g.lane === e.lane && Math.abs(g.x - e.x) < 50) {
+                enCombate = true;
+                e.vida -= g.dano / 60;
+                g.vida -= e.dano / 60;
+                
+                // Actualizar barras de vida
+                e.visual.querySelector('.health-bar-fill').style.width = (e.vida / e.vidaMax) * 100 + "%";
+                g.visual.querySelector('.health-bar-fill').style.width = (g.vida / g.vidaMax) * 100 + "%";
+            }
+        });
+
+        if (!enCombate) {
+            g.x += g.vel;
+            g.visual.style.left = g.x + 'px';
+        }
+
+        if (g.vida <= 0 || g.x > 820) {
+            g.visual.remove();
+            guardianesActivos.splice(i, 1);
+        }
+    });
+
+    // Mover Enemigos
+    enemigosActivos.forEach((e, i) => {
+        let enCombate = false;
+        guardianesActivos.forEach(g => {
+            if (e.lane === g.lane && Math.abs(e.x - g.x) < 50) enCombate = true;
+        });
+
+        if (!enCombate) {
+            e.x -= e.vel;
+            e.visual.style.left = e.x + 'px';
+        }
+
+        if (e.x < 50) {
+            baseHealth -= 0.2;
+            actualizarInterfaz();
+        }
+
+        if (e.vida <= 0) {
+            e.visual.remove();
+            enemigosActivos.splice(i, 1);
+        }
+    });
+
+    if (baseHealth <= 0) {
+        alert("¡GAME OVER! El bosque ha sido invadido.");
+        location.reload();
+    } else {
+        requestAnimationFrame(gameLoop);
+    }
+}
+
+// INICIAR
+actualizarInterfaz();
 gameLoop();
